@@ -64,7 +64,7 @@ describe_shared 'A Rack::Cache::MetaStore Implementation' do
     request = mock_request('/test', {})
     request.env['rack-cache.cache_key'] =
       lambda { |request| request.path_info.reverse }
-    @store.cache_key(request).should == 'tset/'
+    request.cache_key.should == 'tset/'
   end
 
   it "allows custom cache keys from class" do
@@ -72,7 +72,14 @@ describe_shared 'A Rack::Cache::MetaStore Implementation' do
     request.env['rack-cache.cache_key'] = Class.new do
       def self.call(request); request.path_info.reverse end
     end
-    @store.cache_key(request).should == 'tset/'
+    request.cache_key.should == 'tset/'
+  end
+
+  it "generates a consistent cache key" do
+    request = mock_request('/test', {})
+    original_key = request.cache_key
+    request.path_info = '/modified'
+    request.cache_key.should == original_key
   end
 
   # Abstract methods ===========================================================

@@ -29,5 +29,13 @@ module Rack::Cache
       cache_control['no-cache'] ||
         env['HTTP_PRAGMA'] == 'no-cache'
     end
+
+    # Generate a cache key for this request.
+    def cache_key
+      @cache_key ||= begin
+        keygen = self.env['rack-cache.cache_key'] || Key
+        keygen.call(self)
+      end
+    end
   end
 end

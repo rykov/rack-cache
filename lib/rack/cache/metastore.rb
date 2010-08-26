@@ -25,8 +25,7 @@ module Rack::Cache
     # Rack::Cache::Response object if the cache hits or nil if no cache entry
     # was found.
     def lookup(request, entity_store)
-      key = cache_key(request)
-      entries = read(key)
+      entries = read(request.cache_key)
 
       # bail out if we have nothing cached
       return nil if entries.empty?
@@ -50,7 +49,7 @@ module Rack::Cache
     # entries are read and any that match the response are removed.
     # This method calls #write with the new list of cache entries.
     def store(request, response, entity_store)
-      key = cache_key(request)
+      key = request.cache_key
       stored_env = persist_request(request)
 
       # write the response body to the entity store if this is the
@@ -79,16 +78,10 @@ module Rack::Cache
       key
     end
 
-    # Generate a cache key for the request.
-    def cache_key(request)
-      keygen = request.env['rack-cache.cache_key'] || Key
-      keygen.call(request)
-    end
-
     # Invalidate all cache entries that match the request.
     def invalidate(request, entity_store)
       modified = false
-      key = cache_key(request)
+      key = request.cache_key
       entries =
         read(key).map do |req, res|
           response = restore_response(res)
