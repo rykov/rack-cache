@@ -32,10 +32,7 @@ module Rack::Cache
 
     # Generate a cache key for this request.
     def cache_key
-      @cache_key ||= begin
-        keygen = self.env['rack-cache.cache_key'] || Key
-        keygen.call(self)
-      end
+      @cache_key ||= (env['rack-cache.cache_key'] || Key).call(self)
     end
   end
 end
